@@ -17,9 +17,13 @@ const IGNORED = [
 
 const isBinary = (contents) => contents.subarray(0, 8000).includes(0);
 
+// lint-staged passes absolute paths. On Windows, cwd has backslashes and the
+// paths may not, so normalise both before stripping the prefix.
+const root = `${process.cwd().replaceAll("\\", "/")}/`;
+
 const oversized = process.argv
   .slice(2)
-  .map((file) => file.replaceAll("\\", "/").replace(`${process.cwd()}/`, ""))
+  .map((file) => file.replaceAll("\\", "/").replace(root, ""))
   .filter((file) => !IGNORED.some((pattern) => pattern.test(file)))
   .map((file) => ({ file, contents: readFileSync(file) }))
   .filter(({ contents }) => !isBinary(contents))

@@ -12,6 +12,9 @@ npm install -g agent-browser
 agent-browser install
 ```
 
+The factory workflows in `.github/workflows/agent-*.yml` install it before the
+agent starts.
+
 ## Asking your own question
 
 Start the app with `npm run dev` first. The examples below use
@@ -45,6 +48,27 @@ The commands worth knowing: `open`, `click`, `fill`,
 `is visible|enabled|checked`, `eval`, `snapshot` (the accessibility tree, with
 refs), `screenshot`, `console`, `errors`, `close`. `agent-browser --help` has
 the rest.
+
+## Signing in as a seeded user
+
+Most pages need a user in the session. Without one, a page answers 401
+"Select a user from the DevUI panel". Sign in by posting to the endpoint the
+DevUI panel uses, from inside the page so the cookie lands in the browser:
+
+```bash
+agent-browser open http://localhost:5173/courses
+agent-browser eval "fetch('/api/switch-user', {method: 'POST', body: new URLSearchParams({userId: '5'})}).then(r => r.status)"
+agent-browser open http://localhost:5173/courses/introduction-to-typescript/lessons/1
+```
+
+User 5 is Emma Wilson (`emma.wilson@student.dev`), a Student enrolled in
+`introduction-to-typescript`, whose first lesson is lesson 1. User 1 is the
+Admin and users 2–4 are Instructors. Ids follow the order `scripts/seed.ts`
+inserts users in, so if that order changes, look the user up by email in
+`data.db`.
+
+To see prices for another country, post a two-letter code to
+`/api/set-dev-country` the same way: `new URLSearchParams({country: 'IN'})`.
 
 **Ask the page, do not ask the person.** A change you have not looked at is a
 change you are reporting on trust.

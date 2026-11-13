@@ -306,6 +306,13 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Install agent-browser
+        # The agent screenshots the app for the tickets it writes. See
+        # docs/agents/agent-browser.md.
+        run: |
+          npm install -g agent-browser
+          agent-browser install
+
       - name: Decompose the spec into a queue
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -313,6 +320,13 @@ jobs:
         # Reads only. The queue comes back as queue.json, shaped and validated
         # by .sandcastle/agent-workflows/implement-spec/decomposition-schema.ts.
         run: npx tsx .sandcastle/agent-workflows/implement-spec/decompose.ts
+
+      - name: Keep the agent's transcript
+        if: always()
+        uses: ./.github/actions/keep-transcript
+        with:
+          name: transcript-decompose
+          token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
       - name: Write the queue as issues
         env:
@@ -412,6 +426,13 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Install agent-browser
+        # The agent screenshots the app for the PR's evidence. See
+        # docs/agents/agent-browser.md.
+        run: |
+          npm install -g agent-browser
+          agent-browser install
+
       - name: Migrate and seed the database
         run: |
           npm run db:migrate
@@ -476,6 +497,13 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx tsx .sandcastle/agent-workflows/implement-spec/build.ts
+
+      - name: Keep the agent's transcript
+        if: always()
+        uses: ./.github/actions/keep-transcript
+        with:
+          name: transcript-build
+          token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
       - name: Check the agent committed
         # A run with no commit fails here, so the ticket is parked with

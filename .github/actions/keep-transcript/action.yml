@@ -1,0 +1,42 @@
+name: Keep the agent's transcript
+description: >
+  Uploads the Claude Code session files of this job as an artifact, for
+  retros. The Sandcastle log shows each tool call the agent made but not what
+  the call returned; the session files have both.
+
+# This repository is public, and anyone signed in to GitHub can download its
+# artifacts. Actions masks secrets in the log, not in artifacts, so the agent's
+# token is scrubbed out of every session file before the upload. FACTORY_PAT
+# never enters the agent's environment, so it cannot be in a transcript.
+
+inputs:
+  name:
+    description: Artifact name. Unique per job, e.g. transcript-implement.
+    required: true
+  token:
+    description: The CLAUDE_CODE_OAUTH_TOKEN the agent ran with, to scrub out.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Scrub the token from the session files
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        dir="$HOME/.claude/projects"
+        [ -d "$dir" ] || { echo "No session files."; exit 0; }
+        [ -n "$TOKEN" ] || exit 0
+        find "$dir" -type f -name '*.jsonl' \
+          -exec perl -pi -e 's/\Q$ENV{TOKEN}\E/***/g' {} +
+
+    - name: Upload the session files
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.name }}-attempt-${{ github.run_attempt }}
+        path: ~/.claude/projects/
+        include-hidden-files: true
+        if-no-files-found: ignore
+        retention-days: 14
