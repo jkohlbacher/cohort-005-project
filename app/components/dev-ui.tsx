@@ -126,7 +126,6 @@ export function DevUI({ users, currentUser, devCountry, countryTierInfo, countri
                 <Form
                   key={user.id}
                   method="post"
-                  onSubmit={() => setOpen(false)}
                   action={`/api/switch-user?redirectTo=${encodeURIComponent(location.pathname + location.search)}`}
                 >
                   <input type="hidden" name="userId" value={user.id} />
