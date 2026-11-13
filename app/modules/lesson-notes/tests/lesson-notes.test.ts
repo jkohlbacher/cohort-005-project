@@ -22,7 +22,14 @@ describe("noteDraft", () => {
     const draft = noteDraft("  \n\t ");
     expect(draft.empty).toBe(true);
     expect(draft.canSave).toBe(false);
-    expect(draft.length).toBe(5);
+    expect(draft.length).toBe(0);
+  });
+
+  it("does not count surrounding whitespace against the maximum", () => {
+    const draft = noteDraft(`  ${"a".repeat(2000)}\n`);
+    expect(draft.length).toBe(2000);
+    expect(draft.tooLong).toBe(false);
+    expect(draft.canSave).toBe(true);
   });
 
   it("allows a note of exactly the maximum length", () => {

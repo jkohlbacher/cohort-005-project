@@ -9,10 +9,12 @@ export type NoteDraft = {
 };
 
 export function describeDraft(body: string): NoteDraft {
-  const empty = body.trim().length === 0;
-  const tooLong = body.length > MAX_NOTE_LENGTH;
+  // The save action trims before it checks, so the draft is measured trimmed.
+  const length = body.trim().length;
+  const empty = length === 0;
+  const tooLong = length > MAX_NOTE_LENGTH;
   return {
-    length: body.length,
+    length,
     maxLength: MAX_NOTE_LENGTH,
     empty,
     tooLong,
