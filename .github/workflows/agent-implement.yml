@@ -132,6 +132,13 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Install agent-browser
+        # The agent screenshots the app for the PR's evidence. See
+        # docs/agents/agent-browser.md.
+        run: |
+          npm install -g agent-browser
+          agent-browser install
+
       - name: Migrate and seed the database
         # The agent gets a real database, because half of this repo's checks
         # need one. It is disposable: a fresh one, migrated and seeded, on
@@ -186,6 +193,13 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx tsx .sandcastle/agent-workflows/implement/implement.ts
+
+      - name: Keep the agent's transcript
+        if: always()
+        uses: ./.github/actions/keep-transcript
+        with:
+          name: transcript-implement
+          token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
       - name: Check the agent committed
         # The agent owns the commits now, so this step owns the question of

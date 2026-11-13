@@ -163,6 +163,13 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Install agent-browser
+        # The agent screenshots the app for the verdict's evidence. See
+        # docs/agents/agent-browser.md.
+        run: |
+          npm install -g agent-browser
+          agent-browser install
+
       - name: Migrate and seed the database
         # The pre-commit hook runs on every commit the agent makes, and the
         # repo's checks need a database.
@@ -188,6 +195,13 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           OUTPUT_DIR: ${{ runner.temp }}
         run: npx tsx .sandcastle/agent-workflows/review/review.ts
+
+      - name: Keep the agent's transcript
+        if: always()
+        uses: ./.github/actions/keep-transcript
+        with:
+          name: transcript-review
+          token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
       - name: Push the review's fixes
         id: push

@@ -162,6 +162,14 @@ jobs:
         if: steps.batch.outputs.numbers != '[]'
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Install agent-browser
+        # The agent screenshots the app for its findings. See
+        # docs/agents/agent-browser.md.
+        if: steps.batch.outputs.numbers != '[]'
+        run: |
+          npm install -g agent-browser
+          agent-browser install
+
       - name: Explore
         if: steps.batch.outputs.numbers != '[]'
         env:
@@ -170,6 +178,13 @@ jobs:
         # The plan comes back as plan.json, shaped and validated by
         # .sandcastle/agent-workflows/explore/plan-schema.ts.
         run: npx tsx .sandcastle/agent-workflows/explore/explore.ts
+
+      - name: Keep the agent's transcript
+        if: always() && steps.batch.outputs.numbers != '[]'
+        uses: ./.github/actions/keep-transcript
+        with:
+          name: transcript-explore
+          token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
       - name: Hand the plan to the apply job
         id: plan

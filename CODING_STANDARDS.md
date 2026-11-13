@@ -20,6 +20,15 @@ a type and you do not check it again. Coerce numbers through the schema, not
 `Number()`: `Number("")` is `0`, and an empty `lessonId` once opened lesson 0
 for every learner.
 
+## One owner per validation rule
+
+When the UI checks input before it is sent (a character counter, a disabled
+button, an inline error), it calls the same function the server's action
+validates with. A rule written out a second time for the browser is a finding,
+even when the two copies agree today. The note editor's first counter measured
+the raw text while the save action trimmed it first, so a note the server would
+accept showed as too long and Save stayed disabled.
+
 ## Check permission in the action, not only the loader
 
 A loader guard does not protect an action. They are separate requests. For a
